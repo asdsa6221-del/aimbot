@@ -1,0 +1,108 @@
+--// =========================
+--// Developer ESP + Toggle UI + Name Tags
+--// =========================
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local ESP_ENABLED = true
+
+--// =========================
+--// Create Toggle Menu (UI)
+--// =========================
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DevESPGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 200, 0, 50)
+ToggleButton.Position = UDim2.new(0, 20, 0, 200)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 20
+ToggleButton.Text = "ESP: ON"
+ToggleButton.Parent = ScreenGui
+
+ToggleButton.MouseButton1Click:Connect(function()
+    ESP_ENABLED = not ESP_ENABLED
+    ToggleButton.Text = "ESP: " .. (ESP_ENABLED and "ON" or "OFF")
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Character then
+            local esp = plr.Character:FindFirstChild("DevESP")
+            if esp then
+                esp.Enabled = ESP_ENABLED
+            end
+            local nameTag = plr.Character:FindFirstChild("DevNameTag")
+            if nameTag then
+                nameTag.Enabled = ESP_ENABLED
+            end
+        end
+    end
+end)
+
+--// =========================
+--// ESP Creation Function
+--// =========================
+
+local function createESP(character, player)
+    if character:FindFirstChild("DevESP") then return end
+
+    -- Highlight (Box) through walls
+    local hl = Instance.new("Highlight")
+    hl.Name = "DevESP"
+    hl.FillColor = Color3.fromRGB(255, 0, 0)       -- Red
+    hl.OutlineColor = Color3.fromRGB(255, 0, 0)
+    hl.FillTransparency = 0.7
+    hl.Enabled = ESP_ENABLED
+    hl.Parent = character
+
+    -- Name Tag above head
+    local head = character:FindFirstChild("Head")
+    if head then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "DevNameTag"
+        billboard.Adornee = head
+        billboard.Size = UDim2.new(0, 100, 0, 40)
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.AlwaysOnTop = true  -- Draw through walls
+        billboard.Enabled = ESP_ENABLED
+        billboard.Parent = character
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        textLabel.TextStrokeTransparency = 0
+        textLabel.Font = Enum.Font.GothamBold
+        textLabel.TextSize = 18
+        textLabel.Text = player.Name
+        textLabel.Parent = billboard
+    end
+end
+
+--// Apply ESP to a player
+local function setupPlayer(player)
+    player.CharacterAdded:Connect(function(char)
+        char:WaitForChild("HumanoidRootPart", 5)
+        createESP(char, player)
+    end)
+
+    if player.Character then
+        createESP(player.Character, player)
+    end
+end
+
+--// Listen for players joining
+Players.PlayerAdded:Connect(setupPlayer)
+
+--// Apply to existing players
+for _, plr in ipairs(Players:GetPlayers()) do
+    setupPlayer(plr)
+end
+
+print("Developer ESP with Names Loaded ✔")
