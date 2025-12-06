@@ -62,7 +62,7 @@ SpeedBox.FocusLost:Connect(function(enterPressed)
 end)
 
 -- FlySpeed TextBox
-local defaultFlySpeed = 50
+local defaultFlySpeed = 65 -- UPDATED DEFAULT
 local FlySpeedLabel = Instance.new("TextLabel", Frame)
 FlySpeedLabel.Position = UDim2.new(0,10,0,100)
 FlySpeedLabel.Size = UDim2.new(0.5,-15,0,30)
@@ -96,7 +96,7 @@ FlySpeedBox.FocusLost:Connect(function(enterPressed)
 end)
 
 -- Infinite Jump
-local infiniteJump = false
+local infiniteJump = true -- ENABLED BY DEFAULT
 local JumpButton = Instance.new("TextButton", Frame)
 JumpButton.Position = UDim2.new(0,10,0,150)
 JumpButton.Size = UDim2.new(1,-20,0,40)
@@ -115,7 +115,7 @@ UserInputService.JumpRequest:Connect(function()
 end)
 
 -- Fly
-local flyEnabled = false
+local flyEnabled = true -- ENABLED BY DEFAULT
 local flyButton = Instance.new("TextButton", Frame)
 flyButton.Position = UDim2.new(0,10,0,200)
 flyButton.Size = UDim2.new(1,-20,0,40)
@@ -147,7 +147,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ESP (Persistent)
-local espEnabled = false
+local espEnabled = true -- ENABLED BY DEFAULT
 local espBoxes = {}
 
 local ESPButton = Instance.new("TextButton", Frame)
@@ -181,13 +181,19 @@ local function createESP(player)
     end)
 end
 
+if espEnabled then
+    for _, player in pairs(Players:GetPlayers()) do
+        createESP(player)
+    end
+    Players.PlayerAdded:Connect(createESP)
+end
+
 ESPButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
         for _, player in pairs(Players:GetPlayers()) do
             createESP(player)
         end
-        Players.PlayerAdded:Connect(createESP)
     else
         for _, box in pairs(espBoxes) do
             if box then box:Destroy() end
@@ -197,7 +203,7 @@ ESPButton.MouseButton1Click:Connect(function()
 end)
 
 -- Head + Body Lock-On
-local lockOn = false
+local lockOn = true -- ENABLED BY DEFAULT
 local LockButton = Instance.new("TextButton", Frame)
 LockButton.Position = UDim2.new(0,10,0,300)
 LockButton.Size = UDim2.new(1,-20,0,40)
@@ -229,7 +235,7 @@ local function getNearestPlayerHead()
 end
 
 -- AutoNoClip
-local autoNoClipEnabled = false
+local autoNoClipEnabled = false -- OFF BY DEFAULT
 local NoClipButton = Instance.new("TextButton", Frame)
 NoClipButton.Position = UDim2.new(0,10,0,350)
 NoClipButton.Size = UDim2.new(1,-20,0,40)
@@ -252,42 +258,4 @@ RunService.Stepped:Connect(function()
             local direction = Vector3.new(0,0,0)
             if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
             if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
-            if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
-            if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
-            if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
-            if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
-            if direction.Magnitude > 0 then
-                hrp.Velocity = direction.Unit * flySpeed
-            else
-                hrp.Velocity = Vector3.new(0,0,0)
-            end
-        end
-    end
-
-    -- Lock-on: camera + character rotation
-    if lockOn then
-        local nearest = getNearestPlayerHead()
-        if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
-            local targetPos = nearest.Character.Head.Position
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
-            end
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
-        end
-    end
-
-    -- AutoNoClip
-    if autoNoClipEnabled then
-        local char = LocalPlayer.Character
-        if char then
-            for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end
-end)
+            if keysDown[Enum.Key
