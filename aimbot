@@ -1,1 +1,293 @@
-local v0=game:GetService("Players");local v1=v0.LocalPlayer;local v2=game:GetService("RunService");local v3=game:GetService("UserInputService");local v4=workspace.CurrentCamera;local v5=Instance.new("ScreenGui",v1:WaitForChild("PlayerGui"));v5.Name="AdminPanel";local v7=Instance.new("Frame",v5);v7.Size=UDim2.new(117 -(32 + 85) ,246 + 4 ,0 + 0 ,78 + 272 );v7.Position=UDim2.new(971 -(140 + 831) ,1900 -(1409 + 441) ,718 -(15 + 703) ,1007 -(892 + 65) );v7.BackgroundColor3=Color3.fromRGB(19 + 21 ,478 -(262 + 176) ,95 -55 );v7.BorderSizePixel=0 -0 ;v7.Active=true;v7.Draggable=true;local v14=Instance.new("TextLabel",v7);v14.Size=UDim2.new(1,0 -0 ,0 -0 ,50);v14.Text="Made by Adam";v14.TextColor3=Color3.fromRGB(255,605 -(87 + 263) ,255);v14.BackgroundTransparency=181 -(67 + 113) ;v14.Font=Enum.Font.SourceSansBold;v14.TextSize=18 + 6 ;local v22=Instance.new("TextButton",v7);v22.Position=UDim2.new(0 -0 ,8 + 2 ,0 -0 ,10 + 50 );v22.Size=UDim2.new(953 -(802 + 150) , -(53 -33),0 -0 ,30 + 10 );v22.Text="Toggle Speed";v22.BackgroundColor3=Color3.fromRGB(1067 -(915 + 82) ,768 -(208 + 490) ,198 -128 );v22.TextColor3=Color3.new(1,1 + 0 ,1 -0 );local v28=false;local v29=1203 -(1069 + 118) ;v22.MouseButton1Click:Connect(function() local v63=0 -0 ;while true do if (v63==(0 -0)) then v28= not v28;if v28 then v1.Character.Humanoid.WalkSpeed=v29 * (1 + 2) ;else v1.Character.Humanoid.WalkSpeed=v29;end break;end end end);local v30=false;local v31=Instance.new("TextButton",v7);v31.Position=UDim2.new(0 -0 ,10 + 0 ,791 -(368 + 423) ,345 -235 );v31.Size=UDim2.new(19 -(10 + 8) , -(76 -56),442 -(416 + 26) ,127 -87 );v31.Text="Toggle Infinite Jump";v31.BackgroundColor3=Color3.fromRGB(31 + 39 ,123 -53 ,508 -(145 + 293) );v31.TextColor3=Color3.new(1 -0 ,2 -1 ,431 -(44 + 386) );v31.MouseButton1Click:Connect(function() v30= not v30;end);v3.JumpRequest:Connect(function() if (v30 and v1.Character and v1.Character:FindFirstChild("Humanoid")) then v1.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping);end end);local v37=false;local v38=Instance.new("TextButton",v7);v38.Position=UDim2.new(1486 -(998 + 488) ,4 + 6 ,0 + 0 ,160);v38.Size=UDim2.new(773 -(201 + 571) , -(1158 -(116 + 1022)),0 -0 ,24 + 16 );v38.Text="Toggle ESP";v38.BackgroundColor3=Color3.fromRGB(255 -185 ,248 -178 ,937 -(550 + 317) );v38.TextColor3=Color3.new(1,860 -(814 + 45) ,1);local function v44(v64) local v65=0 -0 ;while true do if (v65==0) then if (v64==v1) then return;end if (v64.Character and v64.Character:FindFirstChild("HumanoidRootPart")) then local v86=Instance.new("BoxHandleAdornment");v86.Adornee=v64.Character.HumanoidRootPart;v86.Color3=Color3.fromRGB(14 + 241 ,0 + 0 ,885 -(261 + 624) );v86.Transparency=0.5;v86.Size=Vector3.new(6 -2 ,1086 -(1020 + 60) ,2);v86.AlwaysOnTop=true;v86.Parent=workspace;return v86;end break;end end end local v45={};v38.MouseButton1Click:Connect(function() local v66=1423 -(630 + 793) ;while true do if (v66==(285 -(134 + 151))) then v37= not v37;if v37 then local v94=0 -0 ;while true do if (v94==(0 -0)) then for v105,v106 in pairs(v0:GetPlayers()) do v45[v106]=v44(v106);end v0.PlayerAdded:Connect(function(v108) v45[v108]=v44(v108);end);break;end end else local v95=0 + 0 ;while true do if ((0 -0)==v95) then for v110,v111 in pairs(v45) do if v111 then v111:Destroy();end end v45={};break;end end end break;end end end);local v46=false;local v47=Instance.new("TextButton",v7);v47.Position=UDim2.new(0 -0 ,34 -24 ,1747 -(760 + 987) ,277 -67 );v47.Size=UDim2.new(242 -(187 + 54) , -(800 -(162 + 618)),1913 -(1789 + 124) ,40);v47.Text="Toggle Lock-On";v47.BackgroundColor3=Color3.fromRGB(836 -(745 + 21) ,25 + 45 ,192 -122 );v47.TextColor3=Color3.new(3 -2 ,1637 -(1373 + 263) ,1 + 0 );v47.MouseButton1Click:Connect(function() v46= not v46;end);local function v53() local v67=nil;local v68=math.huge;local v69=v1.Character;if ( not v69 or  not v69:FindFirstChild("HumanoidRootPart")) then return nil;end local v70=v69.HumanoidRootPart.Position;for v79,v80 in pairs(v0:GetPlayers()) do if ((v80~=v1) and v80.Character and v80.Character:FindFirstChild("HumanoidRootPart")) then local v82=(v80.Character.HumanoidRootPart.Position-v70).Magnitude;if (v82<v68) then v68=v82;v67=v80;end end end return v67;end local v54=false;local v55=Instance.new("TextButton",v7);v55.Position=UDim2.new(1000 -(451 + 549) ,10,0 + 0 ,83 + 177 );v55.Size=UDim2.new(1 -0 , -(1075 -(87 + 968)),0,176 -136 );v55.Text="Toggle Fly";v55.BackgroundColor3=Color3.fromRGB(64 + 6 ,158 -88 ,70);v55.TextColor3=Color3.new(1414 -(447 + 966) ,2 -1 ,1818 -(1703 + 114) );local v61=75 -25 ;local v62={};v55.MouseButton1Click:Connect(function() local v71=701 -(376 + 325) ;local v72;while true do if (v71==1) then if (v72 and v72:FindFirstChild("Humanoid")) then v72.Humanoid.PlatformStand=v54;end break;end if (v71==(0 -0)) then v54= not v54;v72=v1.Character;v71=1 + 0 ;end end end);v3.InputBegan:Connect(function(v73,v74) local v75=0 + 0 ;while true do if (v75==(560 -(306 + 254))) then if v74 then return;end if (v73.UserInputType==Enum.UserInputType.Keyboard) then v62[v73.KeyCode]=true;end break;end end end);v3.InputEnded:Connect(function(v76) if (v76.UserInputType==Enum.UserInputType.Keyboard) then v62[v76.KeyCode]=false;end end);v2.RenderStepped:Connect(function(v77) local v78=0 -0 ;while true do if (v78==0) then if v46 then local v98=v53();if (v98 and v98.Character and v98.Character:FindFirstChild("HumanoidRootPart")) then v4.CFrame=CFrame.new(v4.CFrame.Position,v98.Character.HumanoidRootPart.Position);end end if v54 then local v99=v1.Character;if (v99 and v99:FindFirstChild("HumanoidRootPart")) then local v101=0 + 0 ;local v102;local v103;local v104;while true do if (v101==(2 -1)) then v104=Vector3.new(14 -(9 + 5) ,0 + 0 ,376 -(85 + 291) );if v62[Enum.KeyCode.W] then v104=v104 + v103.LookVector ;end v101=4 -2 ;end if (v101==(1269 -(243 + 1022))) then if v62[Enum.KeyCode.LeftShift] then v104=v104 + Vector3.new(0 -0 , -(1 + 0),290 -(60 + 230) ) ;end if (v104.Magnitude>0) then v102.Velocity=v104.Unit * v61 ;else v102.Velocity=Vector3.new(1180 -(1123 + 57) ,572 -(426 + 146) ,0 + 0 );end break;end if ((2 + 0)==v101) then if v62[Enum.KeyCode.S] then v104=v104-v103.LookVector ;end if v62[Enum.KeyCode.A] then v104=v104-v103.RightVector ;end v101=257 -(163 + 91) ;end if ((1933 -(1869 + 61))==v101) then if v62[Enum.KeyCode.D] then v104=v104 + v103.RightVector ;end if v62[Enum.KeyCode.Space] then v104=v104 + Vector3.new(0 -0 ,1 + 0 ,0) ;end v101=2 + 2 ;end if (v101==(0 -0)) then v102=v99.HumanoidRootPart;v103=v4.CFrame;v101=1 -0 ;end end end end break;end end end);
+--// Full Admin Panel Script with WalkSpeed + FlySpeed TextBoxes
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AdminPanel"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 250, 0, 500)
+Frame.Position = UDim2.new(0, 50, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1,0,0,50)
+Title.Text = "Made by Adam"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 24
+
+-- WalkSpeed TextBox
+local defaultWalkSpeed = 16
+local SpeedLabel = Instance.new("TextLabel", Frame)
+SpeedLabel.Position = UDim2.new(0,10,0,60)
+SpeedLabel.Size = UDim2.new(0.5,-15,0,30)
+SpeedLabel.Text = "WalkSpeed:"
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
+SpeedLabel.Font = Enum.Font.SourceSans
+SpeedLabel.TextSize = 18
+SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local SpeedBox = Instance.new("TextBox", Frame)
+SpeedBox.Position = UDim2.new(0.5,5,0,60)
+SpeedBox.Size = UDim2.new(0.5,-15,0,30)
+SpeedBox.PlaceholderText = tostring(defaultWalkSpeed)
+SpeedBox.Text = ""
+SpeedBox.ClearTextOnFocus = false
+SpeedBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
+SpeedBox.TextColor3 = Color3.new(1,1,1)
+SpeedBox.Font = Enum.Font.SourceSans
+SpeedBox.TextSize = 18
+
+SpeedBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local value = tonumber(SpeedBox.Text)
+        if value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = value
+        end
+    end
+end)
+
+-- FlySpeed TextBox
+local defaultFlySpeed = 50
+local FlySpeedLabel = Instance.new("TextLabel", Frame)
+FlySpeedLabel.Position = UDim2.new(0,10,0,100)
+FlySpeedLabel.Size = UDim2.new(0.5,-15,0,30)
+FlySpeedLabel.Text = "FlySpeed:"
+FlySpeedLabel.BackgroundTransparency = 1
+FlySpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
+FlySpeedLabel.Font = Enum.Font.SourceSans
+FlySpeedLabel.TextSize = 18
+FlySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local FlySpeedBox = Instance.new("TextBox", Frame)
+FlySpeedBox.Position = UDim2.new(0.5,5,0,100)
+FlySpeedBox.Size = UDim2.new(0.5,-15,0,30)
+FlySpeedBox.PlaceholderText = tostring(defaultFlySpeed)
+FlySpeedBox.Text = ""
+FlySpeedBox.ClearTextOnFocus = false
+FlySpeedBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
+FlySpeedBox.TextColor3 = Color3.new(1,1,1)
+FlySpeedBox.Font = Enum.Font.SourceSans
+FlySpeedBox.TextSize = 18
+
+local flySpeed = defaultFlySpeed
+
+FlySpeedBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local value = tonumber(FlySpeedBox.Text)
+        if value then
+            flySpeed = value
+        end
+    end
+end)
+
+-- Infinite Jump
+local infiniteJump = false
+local JumpButton = Instance.new("TextButton", Frame)
+JumpButton.Position = UDim2.new(0,10,0,150)
+JumpButton.Size = UDim2.new(1,-20,0,40)
+JumpButton.Text = "Toggle Infinite Jump"
+JumpButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+JumpButton.TextColor3 = Color3.new(1,1,1)
+
+JumpButton.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Fly
+local flyEnabled = false
+local flyButton = Instance.new("TextButton", Frame)
+flyButton.Position = UDim2.new(0,10,0,200)
+flyButton.Size = UDim2.new(1,-20,0,40)
+flyButton.Text = "Toggle Fly"
+flyButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+flyButton.TextColor3 = Color3.new(1,1,1)
+
+local keysDown = {}
+
+flyButton.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.PlatformStand = flyEnabled
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = false
+    end
+end)
+
+-- ESP (Persistent)
+local espEnabled = false
+local espBoxes = {}
+
+local ESPButton = Instance.new("TextButton", Frame)
+ESPButton.Position = UDim2.new(0,10,0,250)
+ESPButton.Size = UDim2.new(1,-20,0,40)
+ESPButton.Text = "Toggle ESP"
+ESPButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+ESPButton.TextColor3 = Color3.new(1,1,1)
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+    local function buildBox(char)
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        local box = Instance.new("BoxHandleAdornment")
+        box.Adornee = char.HumanoidRootPart
+        box.Color3 = Color3.fromRGB(255,0,0)
+        box.Transparency = 0.5
+        box.Size = Vector3.new(4,6,2)
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
+        box.Parent = workspace
+        espBoxes[player] = box
+    end
+    buildBox(player.Character)
+    player.CharacterAdded:Connect(function(newChar)
+        task.wait(0.1)
+        if espEnabled then
+            if espBoxes[player] then espBoxes[player]:Destroy() end
+            buildBox(newChar)
+        end
+    end)
+end
+
+ESPButton.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            createESP(player)
+        end
+        Players.PlayerAdded:Connect(createESP)
+    else
+        for _, box in pairs(espBoxes) do
+            if box then box:Destroy() end
+        end
+        espBoxes = {}
+    end
+end)
+
+-- Head + Body Lock-On
+local lockOn = false
+local LockButton = Instance.new("TextButton", Frame)
+LockButton.Position = UDim2.new(0,10,0,300)
+LockButton.Size = UDim2.new(1,-20,0,40)
+LockButton.Text = "Toggle Lock-On"
+LockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+LockButton.TextColor3 = Color3.new(1,1,1)
+
+LockButton.MouseButton1Click:Connect(function()
+    lockOn = not lockOn
+end)
+
+local function getNearestPlayerHead()
+    local nearest = nil
+    local shortestDistance = math.huge
+    local lpChar = LocalPlayer.Character
+    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
+    local lpPos = lpChar.HumanoidRootPart.Position
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local distance = (head.Position - lpPos).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearest = player
+            end
+        end
+    end
+    return nearest
+end
+
+-- AutoNoClip
+local autoNoClipEnabled = false
+local NoClipButton = Instance.new("TextButton", Frame)
+NoClipButton.Position = UDim2.new(0,10,0,350)
+NoClipButton.Size = UDim2.new(1,-20,0,40)
+NoClipButton.Text = "Toggle AutoNoClip"
+NoClipButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+NoClipButton.TextColor3 = Color3.new(1,1,1)
+
+NoClipButton.MouseButton1Click:Connect(function()
+    autoNoClipEnabled = not autoNoClipEnabled
+end)
+
+-- Main Loop
+RunService.Stepped:Connect(function()
+    -- Fly movement
+    if flyEnabled then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            local camCFrame = Camera.CFrame
+            local direction = Vector3.new(0,0,0)
+            if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
+            if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
+            if direction.Magnitude > 0 then
+                hrp.Velocity = direction.Unit * flySpeed
+            else
+                hrp.Velocity = Vector3.new(0,0,0)
+            end
+        end
+    end
+
+    -- Lock-on: camera + character rotation
+    if lockOn then
+        local nearest = getNearestPlayerHead()
+        if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
+            local targetPos = nearest.Character.Head.Position
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
+                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
+            end
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+        end
+    end
+
+    -- AutoNoClip
+    if autoNoClipEnabled then
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
