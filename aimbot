@@ -1,51 +1,188 @@
--- Hype Lock-on inside RunService.Stepped
-RunService.RenderStepped:Connect(function()
-    local character = LocalPlayer.Character
-    if character then
-        -- NoClip
-        if NOCLIP_ENABLED then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-            end
-        else
-            for _, part in pairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
-            end
-        end
+--// Admin Panel Script with Movable GUI, Fly, and Correct Controls
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
 
-        -- Hype Lock-on
-        if HYPE_ENABLED then
-            local closestPlayer = nil
-            local shortestDistance = math.huge
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                    local distance = (plr.Character.Head.Position - character.Head.Position).Magnitude
-                    if distance < shortestDistance then
-                        shortestDistance = distance
-                        closestPlayer = plr
-                    end
-                end
-            end
-            if closestPlayer and closestPlayer.Character:FindFirstChild("Head") then
-                -- Make camera scriptable if it isn’t already
-                Camera.CameraType = Enum.CameraType.Scriptable
-                local targetPos = closestPlayer.Character.Head.Position
-                local camPos = Camera.CFrame.Position
-                -- Smoothly interpolate the camera
-                Camera.CFrame = CFrame.new(camPos, targetPos)
-            end
-        else
-            -- Reset camera to default if hype off
-            if Camera.CameraType == Enum.CameraType.Scriptable then
-                Camera.CameraType = Enum.CameraType.Custom
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AdminPanel"
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 250, 0, 350)
+Frame.Position = UDim2.new(0, 50, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true -- Movable frame
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1,0,0,50)
+Title.Text = "Made by Adam"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 24
+
+-- Speed Toggle
+local SpeedButton = Instance.new("TextButton", Frame)
+SpeedButton.Position = UDim2.new(0, 10, 0, 60)
+SpeedButton.Size = UDim2.new(1, -20, 0, 40)
+SpeedButton.Text = "Toggle Speed"
+SpeedButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+SpeedButton.TextColor3 = Color3.new(1,1,1)
+
+local speedEnabled = false
+local defaultWalkSpeed = 16
+SpeedButton.MouseButton1Click:Connect(function()
+    speedEnabled = not speedEnabled
+    if speedEnabled then
+        LocalPlayer.Character.Humanoid.WalkSpeed = defaultWalkSpeed * 3
+    else
+        LocalPlayer.Character.Humanoid.WalkSpeed = defaultWalkSpeed
+    end
+end)
+
+-- Infinite Jump
+local infiniteJump = false
+local JumpButton = Instance.new("TextButton", Frame)
+JumpButton.Position = UDim2.new(0,10,0,110)
+JumpButton.Size = UDim2.new(1,-20,0,40)
+JumpButton.Text = "Toggle Infinite Jump"
+JumpButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+JumpButton.TextColor3 = Color3.new(1,1,1)
+
+JumpButton.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- ESP
+local espEnabled = false
+local ESPButton = Instance.new("TextButton", Frame)
+ESPButton.Position = UDim2.new(0,10,0,160)
+ESPButton.Size = UDim2.new(1,-20,0,40)
+ESPButton.Text = "Toggle ESP"
+ESPButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+ESPButton.TextColor3 = Color3.new(1,1,1)
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Adornee = player.Character.HumanoidRootPart
+        box.Color3 = Color3.fromRGB(255,0,0)
+        box.Transparency = 0.5
+        box.Size = Vector3.new(4,6,2)
+        box.AlwaysOnTop = true
+        box.Parent = workspace
+        return box
+    end
+end
+
+local espBoxes = {}
+
+ESPButton.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            espBoxes[player] = createESP(player)
+        end
+        Players.PlayerAdded:Connect(function(player)
+            espBoxes[player] = createESP(player)
+        end)
+    else
+        for _, box in pairs(espBoxes) do
+            if box then box:Destroy() end
+        end
+        espBoxes = {}
+    end
+end)
+
+-- Camera Lock-On
+local lockOn = false
+local targetPlayer = nil
+local LockButton = Instance.new("TextButton", Frame)
+LockButton.Position = UDim2.new(0,10,0,210)
+LockButton.Size = UDim2.new(1,-20,0,40)
+LockButton.Text = "Toggle Lock-On"
+LockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+LockButton.TextColor3 = Color3.new(1,1,1)
+
+LockButton.MouseButton1Click:Connect(function()
+    lockOn = not lockOn
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            targetPlayer = player
+            break
+        end
+    end
+end)
+
+-- Fly
+local flyEnabled = false
+local flyButton = Instance.new("TextButton", Frame)
+flyButton.Position = UDim2.new(0,10,0,260)
+flyButton.Size = UDim2.new(1,-20,0,40)
+flyButton.Text = "Toggle Fly"
+flyButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+flyButton.TextColor3 = Color3.new(1,1,1)
+
+local flySpeed = 50
+local keysDown = {}
+
+flyButton.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.PlatformStand = flyEnabled
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = false
+    end
+end)
+
+RunService.RenderStepped:Connect(function(delta)
+    -- Lock-on camera
+    if lockOn and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPlayer.Character.HumanoidRootPart.Position)
+    end
+
+    -- Fly movement
+    if flyEnabled then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            local camCFrame = Camera.CFrame
+            local direction = Vector3.new(0,0,0)
+
+            if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
+            if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
+
+            if direction.Magnitude > 0 then
+                hrp.Velocity = direction.Unit * flySpeed
+            else
+                hrp.Velocity = Vector3.new(0,0,0)
             end
         end
     end
