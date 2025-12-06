@@ -1,5 +1,5 @@
 --// =========================
---// Developer ESP + NoClip + Moveable UI
+--// Developer ESP + NoClip + Name Tags + Moveable UI
 --// =========================
 
 local Players = game:GetService("Players")
@@ -22,13 +22,13 @@ ScreenGui.Parent = PlayerGui
 
 -- Frame
 local MenuFrame = Instance.new("Frame")
-MenuFrame.Size = UDim2.new(0, 200, 0, 120)
+MenuFrame.Size = UDim2.new(0, 200, 0, 140)
 MenuFrame.Position = UDim2.new(0, 50, 0, 50)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BorderSizePixel = 0
 MenuFrame.Parent = ScreenGui
 MenuFrame.Active = true
-MenuFrame.Draggable = true  -- Make the menu movable
+MenuFrame.Draggable = true -- Make the menu movable
 
 -- "Made by Adam" Label
 local Label = Instance.new("TextLabel")
@@ -63,6 +63,10 @@ ESPButton.MouseButton1Click:Connect(function()
             if esp then
                 esp.Enabled = ESP_ENABLED
             end
+            local nameTag = plr.Character:FindFirstChild("DevNameTag")
+            if nameTag then
+                nameTag.Enabled = ESP_ENABLED
+            end
         end
     end
 end)
@@ -85,12 +89,13 @@ NoClipButton.MouseButton1Click:Connect(function()
 end)
 
 --// =========================
---// ESP Function
+--// ESP + NameTag Function
 --// =========================
 
-local function createESP(character)
+local function createESP(character, player)
     if character:FindFirstChild("DevESP") then return end
 
+    -- Highlight (Red box)
     local hl = Instance.new("Highlight")
     hl.Name = "DevESP"
     hl.FillColor = Color3.fromRGB(255, 0, 0)
@@ -98,16 +103,39 @@ local function createESP(character)
     hl.FillTransparency = 0.7
     hl.Enabled = ESP_ENABLED
     hl.Parent = character
+
+    -- Name tag above head
+    local head = character:FindFirstChild("Head")
+    if head then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "DevNameTag"
+        billboard.Adornee = head
+        billboard.Size = UDim2.new(0, 100, 0, 40)
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Enabled = ESP_ENABLED
+        billboard.Parent = character
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        textLabel.TextStrokeTransparency = 0
+        textLabel.Font = Enum.Font.GothamBold
+        textLabel.TextSize = 18
+        textLabel.Text = player.Name
+        textLabel.Parent = billboard
+    end
 end
 
---// Apply ESP to player
+-- Apply ESP + NameTag to player
 local function setupPlayer(player)
     player.CharacterAdded:Connect(function(char)
         char:WaitForChild("HumanoidRootPart", 5)
-        createESP(char)
+        createESP(char, player)
     end)
     if player.Character then
-        createESP(player.Character)
+        createESP(player.Character, player)
     end
 end
 
@@ -141,4 +169,4 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-print("Minimal Developer ESP + NoClip Loaded ✔")
+print("Minimal Developer ESP + NoClip + NameTags Loaded ✔")
