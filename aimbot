@@ -1,13 +1,18 @@
 --// =========================
---// Developer ESP (Minimal UI)
+--// Developer ESP + Toggle UI + NoClip
 --// =========================
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
 local ESP_ENABLED = true
+local NOCLIP_ENABLED = false
+local playerRoot = nil
 
 --// =========================
---// Create Minimal Menu
+--// Create Toggle Menu (UI)
 --// =========================
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -15,40 +20,21 @@ ScreenGui.Name = "DevESPGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Frame Container
-local MenuFrame = Instance.new("Frame")
-MenuFrame.Size = UDim2.new(0, 200, 0, 100)
-MenuFrame.Position = UDim2.new(0, 20, 0, 200)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MenuFrame.BorderSizePixel = 0
-MenuFrame.Parent = ScreenGui
-
--- "Made by Adam" Label
-local MadeByLabel = Instance.new("TextLabel")
-MadeByLabel.Size = UDim2.new(1, 0, 0, 30)
-MadeByLabel.Position = UDim2.new(0, 0, 0, 0)
-MadeByLabel.BackgroundTransparency = 1
-MadeByLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MadeByLabel.Font = Enum.Font.GothamBold
-MadeByLabel.TextSize = 18
-MadeByLabel.Text = "Made by Adam"
-MadeByLabel.Parent = MenuFrame
-
 -- ESP Toggle Button
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(1, 0, 0, 50)
-ToggleButton.Position = UDim2.new(0, 0, 0, 40)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.TextSize = 18
-ToggleButton.Text = "ESP: ON"
-ToggleButton.Parent = MenuFrame
+local ToggleESP = Instance.new("TextButton")
+ToggleESP.Size = UDim2.new(0, 200, 0, 50)
+ToggleESP.Position = UDim2.new(0, 20, 0, 200)
+ToggleESP.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ToggleESP.BorderSizePixel = 0
+ToggleESP.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleESP.Font = Enum.Font.GothamBold
+ToggleESP.TextSize = 20
+ToggleESP.Text = "ESP: ON"
+ToggleESP.Parent = ScreenGui
 
-ToggleButton.MouseButton1Click:Connect(function()
+ToggleESP.MouseButton1Click:Connect(function()
     ESP_ENABLED = not ESP_ENABLED
-    ToggleButton.Text = "ESP: " .. (ESP_ENABLED and "ON" or "OFF")
+    ToggleESP.Text = "ESP: " .. (ESP_ENABLED and "ON" or "OFF")
     
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr.Character then
@@ -56,17 +42,39 @@ ToggleButton.MouseButton1Click:Connect(function()
             if esp then
                 esp.Enabled = ESP_ENABLED
             end
+            local nameTag = plr.Character:FindFirstChild("DevNameTag")
+            if nameTag then
+                nameTag.Enabled = ESP_ENABLED
+            end
         end
     end
+end)
+
+-- NoClip Toggle Button
+local ToggleNoClip = Instance.new("TextButton")
+ToggleNoClip.Size = UDim2.new(0, 200, 0, 50)
+ToggleNoClip.Position = UDim2.new(0, 20, 0, 260)
+ToggleNoClip.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ToggleNoClip.BorderSizePixel = 0
+ToggleNoClip.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleNoClip.Font = Enum.Font.GothamBold
+ToggleNoClip.TextSize = 20
+ToggleNoClip.Text = "NoClip: OFF"
+ToggleNoClip.Parent = ScreenGui
+
+ToggleNoClip.MouseButton1Click:Connect(function()
+    NOCLIP_ENABLED = not NOCLIP_ENABLED
+    ToggleNoClip.Text = "NoClip: " .. (NOCLIP_ENABLED and "ON" or "OFF")
 end)
 
 --// =========================
 --// ESP Creation Function
 --// =========================
 
-local function createESP(character)
+local function createESP(character, player)
     if character:FindFirstChild("DevESP") then return end
 
+    -- Highlight (Box) through walls
     local hl = Instance.new("Highlight")
     hl.Name = "DevESP"
     hl.FillColor = Color3.fromRGB(255, 0, 0)
@@ -74,17 +82,40 @@ local function createESP(character)
     hl.FillTransparency = 0.7
     hl.Enabled = ESP_ENABLED
     hl.Parent = character
+
+    -- Name Tag above head
+    local head = character:FindFirstChild("Head")
+    if head then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "DevNameTag"
+        billboard.Adornee = head
+        billboard.Size = UDim2.new(0, 100, 0, 40)
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Enabled = ESP_ENABLED
+        billboard.Parent = character
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        textLabel.TextStrokeTransparency = 0
+        textLabel.Font = Enum.Font.GothamBold
+        textLabel.TextSize = 18
+        textLabel.Text = player.Name
+        textLabel.Parent = billboard
+    end
 end
 
 --// Apply ESP to a player
 local function setupPlayer(player)
     player.CharacterAdded:Connect(function(char)
         char:WaitForChild("HumanoidRootPart", 5)
-        createESP(char)
+        createESP(char, player)
     end)
 
     if player.Character then
-        createESP(player.Character)
+        createESP(player.Character, player)
     end
 end
 
@@ -96,4 +127,35 @@ for _, plr in ipairs(Players:GetPlayers()) do
     setupPlayer(plr)
 end
 
-print("Minimal Developer ESP Loaded ✔")
+--// =========================
+--// NoClip Logic
+--// =========================
+
+RunService.Stepped:Connect(function()
+    local character = LocalPlayer.Character
+    if character and NOCLIP_ENABLED then
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if hrp and humanoid then
+            -- Disable collisions for all parts
+            for _, part in pairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        end
+    elseif character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            -- Re-enable collisions when NoClip off
+            for _, part in pairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+end)
+
+print("Developer ESP + NoClip Loaded ✔")
