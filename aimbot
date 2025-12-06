@@ -1,13 +1,16 @@
 --// =========================
---// Developer ESP + NoClip + Name Tags + Moveable UI
+--// Developer ESP + NoClip + NameTags + Hype + Moveable UI
 --// =========================
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
 
 local ESP_ENABLED = true
 local NOCLIP_ENABLED = false
+local HYPE_ENABLED = false
 
 --// =========================
 --// Create UI
@@ -20,17 +23,15 @@ ScreenGui.Name = "DevESPGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Frame
 local MenuFrame = Instance.new("Frame")
-MenuFrame.Size = UDim2.new(0, 200, 0, 140)
+MenuFrame.Size = UDim2.new(0, 200, 0, 180)
 MenuFrame.Position = UDim2.new(0, 50, 0, 50)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BorderSizePixel = 0
 MenuFrame.Parent = ScreenGui
 MenuFrame.Active = true
-MenuFrame.Draggable = true -- Make the menu movable
+MenuFrame.Draggable = true
 
--- "Made by Adam" Label
 local Label = Instance.new("TextLabel")
 Label.Size = UDim2.new(1, 0, 0, 30)
 Label.Position = UDim2.new(0, 0, 0, 0)
@@ -86,6 +87,23 @@ NoClipButton.Parent = MenuFrame
 NoClipButton.MouseButton1Click:Connect(function()
     NOCLIP_ENABLED = not NOCLIP_ENABLED
     NoClipButton.Text = "NoClip: " .. (NOCLIP_ENABLED and "ON" or "OFF")
+end)
+
+-- Hype Lock-on Button
+local HypeButton = Instance.new("TextButton")
+HypeButton.Size = UDim2.new(1, 0, 0, 40)
+HypeButton.Position = UDim2.new(0, 0, 0, 125)
+HypeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+HypeButton.BorderSizePixel = 0
+HypeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+HypeButton.Font = Enum.Font.GothamBold
+HypeButton.TextSize = 18
+HypeButton.Text = "Hype: OFF"
+HypeButton.Parent = MenuFrame
+
+HypeButton.MouseButton1Click:Connect(function()
+    HYPE_ENABLED = not HYPE_ENABLED
+    HypeButton.Text = "Hype: " .. (HYPE_ENABLED and "ON" or "OFF")
 end)
 
 --// =========================
@@ -150,23 +168,44 @@ end
 
 RunService.Stepped:Connect(function()
     local character = LocalPlayer.Character
-    if character and NOCLIP_ENABLED then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
+    if character then
+        -- NoClip
+        if NOCLIP_ENABLED then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            end
+        else
             for _, part in pairs(character:GetChildren()) do
                 if part:IsA("BasePart") then
-                    part.CanCollide = false
+                    part.CanCollide = true
                 end
             end
-            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
         end
-    elseif character then
-        for _, part in pairs(character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
+
+        -- Hype Lock-on
+        if HYPE_ENABLED then
+            local closestPlayer = nil
+            local shortestDistance = math.huge
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                    local distance = (plr.Character.Head.Position - character.Head.Position).Magnitude
+                    if distance < shortestDistance then
+                        shortestDistance = distance
+                        closestPlayer = plr
+                    end
+                end
+            end
+            if closestPlayer and closestPlayer.Character:FindFirstChild("Head") then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestPlayer.Character.Head.Position)
             end
         end
     end
 end)
 
-print("Minimal Developer ESP + NoClip + NameTags Loaded ✔")
+print("Developer ESP + NoClip + NameTags + Hype Loaded ✔")
