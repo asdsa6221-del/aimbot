@@ -1,172 +1,5 @@
---// =========================
---// Developer ESP + NoClip + NameTags + Hype + Moveable UI
---// =========================
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local Camera = Workspace.CurrentCamera
-
-local ESP_ENABLED = true
-local NOCLIP_ENABLED = false
-local HYPE_ENABLED = false
-
---// =========================
---// Create UI
---// =========================
-
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DevESPGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
-local MenuFrame = Instance.new("Frame")
-MenuFrame.Size = UDim2.new(0, 200, 0, 180)
-MenuFrame.Position = UDim2.new(0, 50, 0, 50)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MenuFrame.BorderSizePixel = 0
-MenuFrame.Parent = ScreenGui
-MenuFrame.Active = true
-MenuFrame.Draggable = true
-
-local Label = Instance.new("TextLabel")
-Label.Size = UDim2.new(1, 0, 0, 30)
-Label.Position = UDim2.new(0, 0, 0, 0)
-Label.BackgroundTransparency = 1
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.Font = Enum.Font.GothamBold
-Label.TextSize = 18
-Label.Text = "Made by Adam"
-Label.Parent = MenuFrame
-
--- ESP Button
-local ESPButton = Instance.new("TextButton")
-ESPButton.Size = UDim2.new(1, 0, 0, 40)
-ESPButton.Position = UDim2.new(0, 0, 0, 35)
-ESPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ESPButton.BorderSizePixel = 0
-ESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ESPButton.Font = Enum.Font.GothamBold
-ESPButton.TextSize = 18
-ESPButton.Text = "ESP: ON"
-ESPButton.Parent = MenuFrame
-
-ESPButton.MouseButton1Click:Connect(function()
-    ESP_ENABLED = not ESP_ENABLED
-    ESPButton.Text = "ESP: " .. (ESP_ENABLED and "ON" or "OFF")
-    
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr.Character then
-            local esp = plr.Character:FindFirstChild("DevESP")
-            if esp then
-                esp.Enabled = ESP_ENABLED
-            end
-            local nameTag = plr.Character:FindFirstChild("DevNameTag")
-            if nameTag then
-                nameTag.Enabled = ESP_ENABLED
-            end
-        end
-    end
-end)
-
--- NoClip Button
-local NoClipButton = Instance.new("TextButton")
-NoClipButton.Size = UDim2.new(1, 0, 0, 40)
-NoClipButton.Position = UDim2.new(0, 0, 0, 80)
-NoClipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-NoClipButton.BorderSizePixel = 0
-NoClipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoClipButton.Font = Enum.Font.GothamBold
-NoClipButton.TextSize = 18
-NoClipButton.Text = "NoClip: OFF"
-NoClipButton.Parent = MenuFrame
-
-NoClipButton.MouseButton1Click:Connect(function()
-    NOCLIP_ENABLED = not NOCLIP_ENABLED
-    NoClipButton.Text = "NoClip: " .. (NOCLIP_ENABLED and "ON" or "OFF")
-end)
-
--- Hype Lock-on Button
-local HypeButton = Instance.new("TextButton")
-HypeButton.Size = UDim2.new(1, 0, 0, 40)
-HypeButton.Position = UDim2.new(0, 0, 0, 125)
-HypeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-HypeButton.BorderSizePixel = 0
-HypeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-HypeButton.Font = Enum.Font.GothamBold
-HypeButton.TextSize = 18
-HypeButton.Text = "Hype: OFF"
-HypeButton.Parent = MenuFrame
-
-HypeButton.MouseButton1Click:Connect(function()
-    HYPE_ENABLED = not HYPE_ENABLED
-    HypeButton.Text = "Hype: " .. (HYPE_ENABLED and "ON" or "OFF")
-end)
-
---// =========================
---// ESP + NameTag Function
---// =========================
-
-local function createESP(character, player)
-    if character:FindFirstChild("DevESP") then return end
-
-    -- Highlight (Red box)
-    local hl = Instance.new("Highlight")
-    hl.Name = "DevESP"
-    hl.FillColor = Color3.fromRGB(255, 0, 0)
-    hl.OutlineColor = Color3.fromRGB(255, 0, 0)
-    hl.FillTransparency = 0.7
-    hl.Enabled = ESP_ENABLED
-    hl.Parent = character
-
-    -- Name tag above head
-    local head = character:FindFirstChild("Head")
-    if head then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "DevNameTag"
-        billboard.Adornee = head
-        billboard.Size = UDim2.new(0, 100, 0, 40)
-        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Enabled = ESP_ENABLED
-        billboard.Parent = character
-
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-        textLabel.TextStrokeTransparency = 0
-        textLabel.Font = Enum.Font.GothamBold
-        textLabel.TextSize = 18
-        textLabel.Text = player.Name
-        textLabel.Parent = billboard
-    end
-end
-
--- Apply ESP + NameTag to player
-local function setupPlayer(player)
-    player.CharacterAdded:Connect(function(char)
-        char:WaitForChild("HumanoidRootPart", 5)
-        createESP(char, player)
-    end)
-    if player.Character then
-        createESP(player.Character, player)
-    end
-end
-
-Players.PlayerAdded:Connect(setupPlayer)
-for _, plr in ipairs(Players:GetPlayers()) do
-    setupPlayer(plr)
-end
-
---// =========================
---// NoClip Logic
---// =========================
-
-RunService.Stepped:Connect(function()
+-- Hype Lock-on inside RunService.Stepped
+RunService.RenderStepped:Connect(function()
     local character = LocalPlayer.Character
     if character then
         -- NoClip
@@ -202,10 +35,18 @@ RunService.Stepped:Connect(function()
                 end
             end
             if closestPlayer and closestPlayer.Character:FindFirstChild("Head") then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestPlayer.Character.Head.Position)
+                -- Make camera scriptable if it isn’t already
+                Camera.CameraType = Enum.CameraType.Scriptable
+                local targetPos = closestPlayer.Character.Head.Position
+                local camPos = Camera.CFrame.Position
+                -- Smoothly interpolate the camera
+                Camera.CFrame = CFrame.new(camPos, targetPos)
+            end
+        else
+            -- Reset camera to default if hype off
+            if Camera.CameraType == Enum.CameraType.Scriptable then
+                Camera.CameraType = Enum.CameraType.Custom
             end
         end
     end
 end)
-
-print("Developer ESP + NoClip + NameTags + Hype Loaded ✔")
