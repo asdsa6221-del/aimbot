@@ -1,4 +1,4 @@
---// Full Admin Panel Script with WalkSpeed + FlySpeed + Persistent Lock-On + ESP Fixes
+--// Full Admin Panel Script with WalkSpeed + FlySpeed TextBoxes + Enemy Lock
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -14,7 +14,7 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 999
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 500)
+Frame.Size = UDim2.new(0, 250, 0, 550)
 Frame.Position = UDim2.new(0, 50, 0, 50)
 Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 Frame.BorderSizePixel = 0
@@ -146,7 +146,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ESP (Persistent + Remove on Leave)
+-- ESP (Persistent)
 local espEnabled = false
 local espBoxes = {}
 
@@ -179,8 +179,8 @@ local function createESP(player)
             buildBox(newChar)
         end
     end)
-    player.AncestryChanged:Connect(function(_, parent)
-        if not parent and espBoxes[player] then
+    player.AncestryChanged:Connect(function()
+        if not player:IsDescendantOf(game) and espBoxes[player] then
             espBoxes[player]:Destroy()
             espBoxes[player] = nil
         end
@@ -234,10 +234,42 @@ local function getNearestPlayerHead()
     return nearest
 end
 
+-- Enemy Lock-On (New)
+local enemyLockOn = false
+local EnemyLockButton = Instance.new("TextButton", Frame)
+EnemyLockButton.Position = UDim2.new(0,10,0,400)
+EnemyLockButton.Size = UDim2.new(1,-20,0,40)
+EnemyLockButton.Text = "Toggle Enemy Lock"
+EnemyLockButton.BackgroundColor3 = Color3.fromRGB(100,0,0)
+EnemyLockButton.TextColor3 = Color3.new(1,1,1)
+
+EnemyLockButton.MouseButton1Click:Connect(function()
+    enemyLockOn = not enemyLockOn
+end)
+
+local function getNearestEnemyHead()
+    local nearest = nil
+    local shortestDistance = math.huge
+    local lpChar = LocalPlayer.Character
+    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
+    local lpPos = lpChar.HumanoidRootPart.Position
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local distance = (head.Position - lpPos).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearest = player
+            end
+        end
+    end
+    return nearest
+end
+
 -- AutoNoClip
 local autoNoClipEnabled = false
 local NoClipButton = Instance.new("TextButton", Frame)
-NoClipButton.Position = UDim2.new(0,10,0,350)
+NoClipButton.Position = UDim2.new(0,10,0,450)
 NoClipButton.Size = UDim2.new(1,-20,0,40)
 NoClipButton.Text = "Toggle AutoNoClip"
 NoClipButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -247,53 +279,67 @@ NoClipButton.MouseButton1Click:Connect(function()
     autoNoClipEnabled = not autoNoClipEnabled
 end)
 
--- Reattach lock-on after respawn
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.2)
-end)
-
 -- Main Loop
 RunService.Stepped:Connect(function()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-
     -- Fly movement
     if flyEnabled then
-        local camCFrame = Camera.CFrame
-        local direction = Vector3.new(0,0,0)
-        if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
-        if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
-        if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
-        if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
-        if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
-        if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
-        if direction.Magnitude > 0 then
-            hrp.Velocity = direction.Unit * flySpeed
-        else
-            hrp.Velocity = Vector3.new(0,0,0)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            local camCFrame = Camera.CFrame
+            local direction = Vector3.new(0,0,0)
+            if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
+            if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
+            if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
+            if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
+            if direction.Magnitude > 0 then
+                hrp.Velocity = direction.Unit * flySpeed
+            else
+                hrp.Velocity = Vector3.new(0,0,0)
+            end
         end
     end
 
-    -- Lock-on: camera + body rotation (fast)
+    -- Regular Lock-on
     if lockOn then
         local nearest = getNearestPlayerHead()
         if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
             local targetPos = nearest.Character.Head.Position
-            local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
-            -- Faster body rotation
-            local currentCFrame = hrp.CFrame
-            hrp.CFrame = currentCFrame:Lerp(CFrame.new(hrp.Position, hrp.Position + lookVector), 0.5)
-            -- Camera rotation
-            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), 0.5)
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
+                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector.Unit)
+            end
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+        end
+    end
+
+    -- Enemy Lock-on
+    if enemyLockOn then
+        local nearest = getNearestEnemyHead()
+        if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
+            local targetPos = nearest.Character.Head.Position
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
+                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector.Unit)
+            end
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
         end
     end
 
     -- AutoNoClip
     if autoNoClipEnabled then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
             end
         end
     end
