@@ -1,4 +1,5 @@
---// Full Admin Panel Script with WalkSpeed + FlySpeed TextBoxes + Enemy Lock
+--// Full Admin Panel Script with WalkSpeed + FlySpeed + ESP + Lock-On + Enemy Lock
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -146,7 +147,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ESP (Persistent)
+-- ESP
 local espEnabled = false
 local espBoxes = {}
 
@@ -202,47 +203,23 @@ ESPButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Enemy Lock-On
-    if enemyLockOn then
-        local nearest = getNearestEnemyHead()
-        if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
-            local char = LocalPlayer.Character
-            local targetHRP = nearest.Character.HumanoidRootPart
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                -- Body rotation
-                local lookVector = (targetHRP.Position - hrp.Position).Unit
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
-                -- Camera rotation
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHRP.Position + Vector3.new(0, 1.5, 0))
-            end
-        end
-    end
+-- Lock-On Toggle (nearest player, all players)
+local lockOn = false
+local LockButton = Instance.new("TextButton", Frame)
+LockButton.Position = UDim2.new(0,10,0,300)
+LockButton.Size = UDim2.new(1,-20,0,40)
+LockButton.Text = "Toggle Lock-On"
+LockButton.BackgroundColor3 = Color3.fromRGB(0,100,0)
+LockButton.TextColor3 = Color3.new(1,1,1)
 
+LockButton.MouseButton1Click:Connect(function()
+    lockOn = not lockOn
+end)
 
-local function getNearestPlayerHead()
-    local nearest = nil
-    local shortestDistance = math.huge
-    local lpChar = LocalPlayer.Character
-    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
-    local lpPos = lpChar.HumanoidRootPart.Position
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local distance = (head.Position - lpPos).Magnitude
-            if distance < shortestDistance then
-                shortestDistance = distance
-                nearest = player
-            end
-        end
-    end
-    return nearest
-end
-
--- Enemy Lock-On (New)
+-- Enemy Lock-On Toggle (enemies only)
 local enemyLockOn = false
 local EnemyLockButton = Instance.new("TextButton", Frame)
-EnemyLockButton.Position = UDim2.new(0,10,0,400)
+EnemyLockButton.Position = UDim2.new(0,10,0,350)
 EnemyLockButton.Size = UDim2.new(1,-20,0,40)
 EnemyLockButton.Text = "Toggle Enemy Lock"
 EnemyLockButton.BackgroundColor3 = Color3.fromRGB(100,0,0)
@@ -252,29 +229,10 @@ EnemyLockButton.MouseButton1Click:Connect(function()
     enemyLockOn = not enemyLockOn
 end)
 
-local function getNearestEnemyHead()
-    local nearest = nil
-    local shortestDistance = math.huge
-    local lpChar = LocalPlayer.Character
-    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
-    local lpPos = lpChar.HumanoidRootPart.Position
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local distance = (head.Position - lpPos).Magnitude
-            if distance < shortestDistance then
-                shortestDistance = distance
-                nearest = player
-            end
-        end
-    end
-    return nearest
-end
-
 -- AutoNoClip
 local autoNoClipEnabled = false
 local NoClipButton = Instance.new("TextButton", Frame)
-NoClipButton.Position = UDim2.new(0,10,0,450)
+NoClipButton.Position = UDim2.new(0,10,0,400)
 NoClipButton.Size = UDim2.new(1,-20,0,40)
 NoClipButton.Text = "Toggle AutoNoClip"
 NoClipButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -284,67 +242,93 @@ NoClipButton.MouseButton1Click:Connect(function()
     autoNoClipEnabled = not autoNoClipEnabled
 end)
 
--- Main Loop
-RunService.Stepped:Connect(function()
-    -- Fly movement
-    if flyEnabled then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local hrp = char.HumanoidRootPart
-            local camCFrame = Camera.CFrame
-            local direction = Vector3.new(0,0,0)
-            if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
-            if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
-            if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
-            if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
-            if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
-            if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
-            if direction.Magnitude > 0 then
-                hrp.Velocity = direction.Unit * flySpeed
-            else
-                hrp.Velocity = Vector3.new(0,0,0)
+-- Utility functions
+local function getNearestPlayerHead()
+    local nearest = nil
+    local shortestDistance = math.huge
+    local lpChar = LocalPlayer.Character
+    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
+    local lpPos = lpChar.HumanoidRootPart.Position
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local distance = (player.Character.Head.Position - lpPos).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearest = player
             end
         end
     end
+    return nearest
+end
 
-    -- Regular Lock-on
+local function getNearestEnemyHead()
+    local nearest = nil
+    local shortestDistance = math.huge
+    local lpChar = LocalPlayer.Character
+    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
+    local lpPos = lpChar.HumanoidRootPart.Position
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("Head") then
+            local distance = (player.Character.Head.Position - lpPos).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearest = player
+            end
+        end
+    end
+    return nearest
+end
+
+-- Main Loop
+RunService.Stepped:Connect(function()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
+
+    -- Fly movement
+    if flyEnabled then
+        local camCFrame = Camera.CFrame
+        local direction = Vector3.new(0,0,0)
+        if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
+        if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
+        if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
+        if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
+        if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
+        if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
+        if direction.Magnitude > 0 then
+            hrp.Velocity = direction.Unit * flySpeed
+        else
+            hrp.Velocity = Vector3.new(0,0,0)
+        end
+    end
+
+    -- Regular Lock-On (all players)
     if lockOn then
         local nearest = getNearestPlayerHead()
         if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
             local targetPos = nearest.Character.Head.Position
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector.Unit)
-            end
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+            local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
+            hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(hrp.Position, hrp.Position + lookVector), 0.5)
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), 0.5)
         end
     end
 
-    -- Enemy Lock-on
+    -- Enemy Lock-On
     if enemyLockOn then
         local nearest = getNearestEnemyHead()
         if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
             local targetPos = nearest.Character.Head.Position
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector.Unit)
-            end
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+            local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
+            hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(hrp.Position, hrp.Position + lookVector), 0.5)
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), 0.5)
         end
     end
 
     -- AutoNoClip
     if autoNoClipEnabled then
-        local char = LocalPlayer.Character
-        if char then
-            for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
             end
         end
     end
