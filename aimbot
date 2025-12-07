@@ -223,15 +223,17 @@ LockButton.Text = "Toggle Lock-On (All)"
 LockButton.BackgroundColor3 = Color3.fromRGB(70,70,70) 
 LockButton.TextColor3 = Color3.new(1,1,1) 
 
- LockButton.MouseButton1Click:Connect(function() 
+LockButton.MouseButton1Click:Connect(function() 
     lockOnEnabled = not lockOnEnabled 
     LockButton.BackgroundColor3 = lockOnEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70) 
 
     if lockOnEnabled then
+        -- CRITICAL: Take camera control for smooth lock-on
         Camera.CameraType = Enum.CameraType.Scriptable
         espEnabled = true 
         ESPButton.BackgroundColor3 = Color3.fromRGB(0,255,0) 
     else
+        -- CRITICAL: Release camera control
         Camera.CameraType = Enum.CameraType.Follow
     end
 end) 
@@ -242,7 +244,7 @@ local enemyLockOnEnabled = false
 local EnemyLockButton = Instance.new("TextButton", Frame) 
 EnemyLockButton.Position = UDim2.new(0,10,0,450) 
 EnemyLockButton.Size = UDim2.new(1,-20,0,40) 
-EnemyLockButton.Text = "Enemy Lock (Smart)" -- Updated text
+EnemyLockButton.Text = "Enemy Lock (Team)" 
 EnemyLockButton.BackgroundColor3 = Color3.fromRGB(70,70,70) 
 EnemyLockButton.TextColor3 = Color3.new(1,1,1) 
 
@@ -251,8 +253,10 @@ EnemyLockButton.MouseButton1Click:Connect(function()
     EnemyLockButton.BackgroundColor3 = enemyLockOnEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70) 
 
     if enemyLockOnEnabled then
+        -- CRITICAL: Take camera control
         Camera.CameraType = Enum.CameraType.Scriptable
     else
+        -- CRITICAL: Release camera control
         Camera.CameraType = Enum.CameraType.Follow
     end
 end) 
@@ -279,47 +283,18 @@ local function getNearestPlayer()
 end 
 
 
-------------------------------------------------------------
--- 🔄 UPDATED getNearestEnemyPlayer: Universal Target Scan
-------------------------------------------------------------
 local function getNearestEnemyPlayer() 
     local nearest = nil 
     local shortestDistance = math.huge 
     local lpChar = LocalPlayer.Character 
-    local lpTeam = LocalPlayer.Team
-    local MAX_LOCK_RANGE = 200 -- Only targets within 200 studs
-    
+    local lpTeam = LocalPlayer.Team 
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end 
     local lpPos = lpChar.HumanoidRootPart.Position 
 
     for _, player in pairs(Players:GetPlayers()) do 
-        if player ~= LocalPlayer and player.Character then 
-            local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
-            local targetHumanoid = player.Character:FindFirstChild("Humanoid")
-
-            -- Check 1: Must be alive
-            if not targetHumanoid or targetHumanoid.Health <= 0 then continue end 
-            
-            -- Check 2: Must have a body part to target
-            if not targetHRP then continue end
-            
-            local distance = (targetHRP.Position - lpPos).Magnitude 
-
-            -- Check 3: Must be within a reasonable range
-            if distance > MAX_LOCK_RANGE then continue end
-            
-            -- Check 4: Determine if they are an enemy (Smart Check)
-            local isEnemy = true
-
-            -- If the game uses standard Teams, check that first
-            if lpTeam and player.Team and lpTeam == player.Team then
-                isEnemy = false
-            end
-            
-            -- Add checks for common game characteristics (e.g., specific tags or objects) if known.
-            -- For a universal lock-on, relying on different teams OR no teams (Free-for-all) is best.
-            
-            if isEnemy and distance < shortestDistance then 
+        if player ~= LocalPlayer and player.Team ~= lpTeam and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
+            local distance = (player.Character.HumanoidRootPart.Position - lpPos).Magnitude 
+            if distance < shortestDistance then 
                 shortestDistance = distance 
                 nearest = player 
             end 
@@ -327,7 +302,6 @@ local function getNearestEnemyPlayer()
     end 
     return nearest 
 end 
-------------------------------------------------------------
 
 
 -- Custom Lock-On UI 
@@ -443,9 +417,11 @@ CustomLockButton.MouseButton1Click:Connect(function()
     if customLockOnEnabled then
         SelectionFrame.Visible = true 
         refreshPlayerList()
+        -- CRITICAL: Take camera control
         Camera.CameraType = Enum.CameraType.Scriptable
     else
         SelectionFrame.Visible = false 
+        -- CRITICAL: Release camera control
         Camera.CameraType = Enum.CameraType.Follow
     end
 end) 
@@ -473,7 +449,7 @@ RunService.RenderStepped:Connect(function()
     end 
 
 
-    -- 🔒 Lock-On (All Players) 
+    -- 🔒 Lock-On (All Players) - ACTIVATED BY lockOnEnabled
     if lockOnEnabled then 
         local target = getNearestPlayer() 
         if target and target.Character and target.Character:FindFirstChild("Head") then 
@@ -487,7 +463,7 @@ RunService.RenderStepped:Connect(function()
         end 
     end 
 
-    -- ⚔️ Enemy Lock-On (Smart Check) 
+    -- ⚔️ Enemy Lock-On (Team Check) - ACTIVATED BY enemyLockOnEnabled
     if enemyLockOnEnabled then 
         local target = getNearestEnemyPlayer() 
         if target and target.Character and target.Character:FindFirstChild("Head") then 
@@ -545,7 +521,6 @@ RunService.RenderStepped:Connect(function()
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
                 local humanoid = player.Character:FindFirstChild("Humanoid") 
                 if humanoid and humanoid.Health > 0 then 
-                    -- Use the standard team check for ESP coloring, as it's less critical than lock-on targeting
                     local isEnemy = (player.Team ~= LocalPlayer.Team) 
                     local color = isEnemy and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,255,0) 
                     createOrUpdateESP(player, color) 
