@@ -202,18 +202,23 @@ ESPButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Head + Body Lock-On
-local lockOn = false
-local LockButton = Instance.new("TextButton", Frame)
-LockButton.Position = UDim2.new(0,10,0,300)
-LockButton.Size = UDim2.new(1,-20,0,40)
-LockButton.Text = "Toggle Lock-On"
-LockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-LockButton.TextColor3 = Color3.new(1,1,1)
+-- Enemy Lock-On
+    if enemyLockOn then
+        local nearest = getNearestEnemyHead()
+        if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
+            local char = LocalPlayer.Character
+            local targetHRP = nearest.Character.HumanoidRootPart
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                -- Body rotation
+                local lookVector = (targetHRP.Position - hrp.Position).Unit
+                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
+                -- Camera rotation
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHRP.Position + Vector3.new(0, 1.5, 0))
+            end
+        end
+    end
 
-LockButton.MouseButton1Click:Connect(function()
-    lockOn = not lockOn
-end)
 
 local function getNearestPlayerHead()
     local nearest = nil
