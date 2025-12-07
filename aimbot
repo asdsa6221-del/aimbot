@@ -1,4 +1,4 @@
---// Full Admin Panel Script with WalkSpeed + FlySpeed + Enemy Lock + Hitbox Breaker + Improved UI
+-- Services
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -14,16 +14,16 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 999
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 500)
+Frame.Size = UDim2.new(0, 250, 0, 600)
 Frame.Position = UDim2.new(0, 50, 0, 50)
-Frame.BackgroundColor3 = Color3.fromRGB(65,105,225) -- royal blue
+Frame.BackgroundColor3 = Color3.fromRGB(65,105,225)
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
 
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1,0,0,50)
-Title.Text = "Adams Premium👑"
+Title.Text = "Adams premium 👑"
 Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.SourceSansBold
@@ -31,16 +31,6 @@ Title.TextSize = 24
 
 -- WalkSpeed
 local defaultWalkSpeed = 16
-local SpeedLabel = Instance.new("TextLabel", Frame)
-SpeedLabel.Position = UDim2.new(0,10,0,60)
-SpeedLabel.Size = UDim2.new(0.5,-15,0,30)
-SpeedLabel.Text = "WalkSpeed:"
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedLabel.Font = Enum.Font.SourceSans
-SpeedLabel.TextSize = 18
-SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
 local SpeedBox = Instance.new("TextBox", Frame)
 SpeedBox.Position = UDim2.new(0.5,5,0,60)
 SpeedBox.Size = UDim2.new(0.5,-15,0,30)
@@ -51,7 +41,6 @@ SpeedBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
 SpeedBox.TextColor3 = Color3.new(1,1,1)
 SpeedBox.Font = Enum.Font.SourceSans
 SpeedBox.TextSize = 18
-
 SpeedBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         local value = tonumber(SpeedBox.Text)
@@ -61,22 +50,16 @@ SpeedBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- FlySpeed
-local defaultFlySpeed = 50
-local FlySpeedLabel = Instance.new("TextLabel", Frame)
-FlySpeedLabel.Position = UDim2.new(0,10,0,100)
-FlySpeedLabel.Size = UDim2.new(0.5,-15,0,30)
-FlySpeedLabel.Text = "FlySpeed:"
-FlySpeedLabel.BackgroundTransparency = 1
-FlySpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
-FlySpeedLabel.Font = Enum.Font.SourceSans
-FlySpeedLabel.TextSize = 18
-FlySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+------------------------------------------------------------
+-- ✈️ NEW FLY SPEED BOX (ONLY ADDITION)
+------------------------------------------------------------
+local flySpeed = 100
 
 local FlySpeedBox = Instance.new("TextBox", Frame)
-FlySpeedBox.Position = UDim2.new(0.5,5,0,100)
+FlySpeedBox.Position = UDim2.new(0.5,5,0,105)
 FlySpeedBox.Size = UDim2.new(0.5,-15,0,30)
-FlySpeedBox.PlaceholderText = tostring(defaultFlySpeed)
+FlySpeedBox.PlaceholderText = "Fly Speed"
 FlySpeedBox.Text = ""
 FlySpeedBox.ClearTextOnFocus = false
 FlySpeedBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -84,41 +67,19 @@ FlySpeedBox.TextColor3 = Color3.new(1,1,1)
 FlySpeedBox.Font = Enum.Font.SourceSans
 FlySpeedBox.TextSize = 18
 
-local flySpeed = defaultFlySpeed
-
 FlySpeedBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        local value = tonumber(FlySpeedBox.Text)
-        if value then
-            flySpeed = value
-        end
+        local v = tonumber(FlySpeedBox.Text)
+        if v then flySpeed = v end
     end
 end)
+------------------------------------------------------------
 
--- Infinite Jump
-local infiniteJump = false
-local JumpButton = Instance.new("TextButton", Frame)
-JumpButton.Position = UDim2.new(0,10,0,150)
-JumpButton.Size = UDim2.new(1,-20,0,40)
-JumpButton.Text = "Toggle Infinite Jump"
-JumpButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-JumpButton.TextColor3 = Color3.new(1,1,1)
-
-JumpButton.MouseButton1Click:Connect(function()
-    infiniteJump = not infiniteJump
-    JumpButton.BackgroundColor3 = infiniteJump and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
-end)
-
-UserInputService.JumpRequest:Connect(function()
-    if infiniteJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
 
 -- Fly
 local flyEnabled = false
 local flyButton = Instance.new("TextButton", Frame)
-flyButton.Position = UDim2.new(0,10,0,200)
+flyButton.Position = UDim2.new(0,10,0,150)
 flyButton.Size = UDim2.new(1,-20,0,40)
 flyButton.Text = "Toggle Fly"
 flyButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -148,67 +109,114 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+
+-- Infinite Jump
+local infiniteJump = false
+local JumpButton = Instance.new("TextButton", Frame)
+JumpButton.Position = UDim2.new(0,10,0,200)
+JumpButton.Size = UDim2.new(1,-20,0,40)
+JumpButton.Text = "Toggle Infinite Jump"
+JumpButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+JumpButton.TextColor3 = Color3.new(1,1,1)
+
+JumpButton.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    JumpButton.BackgroundColor3 = infiniteJump and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+
+-- NoClip
+local autoNoClipEnabled = false
+local NoClipButton = Instance.new("TextButton", Frame)
+NoClipButton.Position = UDim2.new(0,10,0,250)
+NoClipButton.Size = UDim2.new(1,-20,0,40)
+NoClipButton.Text = "Toggle NoClip"
+NoClipButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+NoClipButton.TextColor3 = Color3.new(1,1,1)
+
+NoClipButton.MouseButton1Click:Connect(function()
+    autoNoClipEnabled = not autoNoClipEnabled
+    NoClipButton.BackgroundColor3 = autoNoClipEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+
+-- Hitbox Breaker BUTTON
+local hitboxBreaker = false
+local HitboxButton = Instance.new("TextButton", Frame)
+HitboxButton.Position = UDim2.new(0,10,0,300)
+HitboxButton.Size = UDim2.new(1,-20,0,40)
+HitboxButton.Text = "Hitbox Breaker"
+HitboxButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+HitboxButton.TextColor3 = Color3.new(1,1,1)
+
+HitboxButton.MouseButton1Click:Connect(function()
+    hitboxBreaker = not hitboxBreaker
+    HitboxButton.BackgroundColor3 = hitboxBreaker and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+
 -- ESP
 local espEnabled = false
 local espBoxes = {}
 
 local ESPButton = Instance.new("TextButton", Frame)
-ESPButton.Position = UDim2.new(0,10,0,250)
+ESPButton.Position = UDim2.new(0,10,0,350)
 ESPButton.Size = UDim2.new(1,-20,0,40)
 ESPButton.Text = "Toggle ESP"
 ESPButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
 ESPButton.TextColor3 = Color3.new(1,1,1)
 
-local function createESP(player)
-    if player == LocalPlayer then return end
-    local function buildBox(char)
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+ESPButton.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    ESPButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+
+local function createOrUpdateESP(player, color)
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    if not espBoxes[player] then
         local box = Instance.new("BoxHandleAdornment")
-        box.Adornee = char.HumanoidRootPart
-        box.Color3 = Color3.fromRGB(255,0,0)
-        box.Transparency = 0.5
-        box.Size = Vector3.new(4,6,2)
+        box.Adornee = player.Character.HumanoidRootPart
         box.AlwaysOnTop = true
         box.ZIndex = 10
         box.Parent = workspace
         espBoxes[player] = box
     end
-    buildBox(player.Character)
-    player.CharacterAdded:Connect(function(newChar)
-        task.wait(0.1)
-        if espEnabled then
-            if espBoxes[player] then espBoxes[player]:Destroy() end
-            buildBox(newChar)
-        end
-    end)
-    player.AncestryChanged:Connect(function(_, parent)
-        if not parent and espBoxes[player] then
-            espBoxes[player]:Destroy()
-            espBoxes[player] = nil
-        end
-    end)
+    local box = espBoxes[player]
+    box.Adornee = player.Character.HumanoidRootPart
+    box.Color3 = color
+    box.Size = Vector3.new(4,6,2)
+    box.Transparency = 0.5
 end
 
-ESPButton.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    ESPButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
-    if espEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createESP(player)
-        end
-        Players.PlayerAdded:Connect(createESP)
-    else
-        for _, box in pairs(espBoxes) do
-            if box then box:Destroy() end
-        end
-        espBoxes = {}
+local function removeESP(player)
+    if espBoxes[player] then
+        espBoxes[player]:Destroy()
+        espBoxes[player] = nil
     end
+end
+
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        if espEnabled then
+            createOrUpdateESP(player, Color3.fromRGB(0,255,0))
+        end
+    end)
 end)
+
 
 -- Lock-On
 local lockOn = false
 local LockButton = Instance.new("TextButton", Frame)
-LockButton.Position = UDim2.new(0,10,0,300)
+LockButton.Position = UDim2.new(0,10,0,400)
 LockButton.Size = UDim2.new(1,-20,0,40)
 LockButton.Text = "Toggle Lock-On"
 LockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -217,14 +225,36 @@ LockButton.TextColor3 = Color3.new(1,1,1)
 LockButton.MouseButton1Click:Connect(function()
     lockOn = not lockOn
     LockButton.BackgroundColor3 = lockOn and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+    if lockOn then
+        espEnabled = true
+        ESPButton.BackgroundColor3 = Color3.fromRGB(0,255,0)
+    end
 end)
 
+
+-- Enemy Lock-On
+local enemyLockOn = false
+local EnemyLockButton = Instance.new("TextButton", Frame)
+EnemyLockButton.Position = UDim2.new(0,10,0,450)
+EnemyLockButton.Size = UDim2.new(1,-20,0,40)
+EnemyLockButton.Text = "Enemy Lock (Arsenal)"
+EnemyLockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+EnemyLockButton.TextColor3 = Color3.new(1,1,1)
+
+EnemyLockButton.MouseButton1Click:Connect(function()
+    enemyLockOn = not enemyLockOn
+    EnemyLockButton.BackgroundColor3 = enemyLockOn and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+
+-- Nearest Player Functions
 local function getNearestPlayer()
     local nearest = nil
     local shortestDistance = math.huge
     local lpChar = LocalPlayer.Character
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
     local lpPos = lpChar.HumanoidRootPart.Position
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local distance = (player.Character.HumanoidRootPart.Position - lpPos).Magnitude
@@ -237,28 +267,17 @@ local function getNearestPlayer()
     return nearest
 end
 
--- Enemy Lock-On (ARS)
-local enemyLockOn = false
-local EnemyLockButton = Instance.new("TextButton", Frame)
-EnemyLockButton.Position = UDim2.new(0,10,0,350)
-EnemyLockButton.Size = UDim2.new(1,-20,0,40)
-EnemyLockButton.Text = "Toggle Enemy Lock"
-EnemyLockButton.BackgroundColor3 = Color3.fromRGB(70,70,70) -- grey by default
-EnemyLockButton.TextColor3 = Color3.new(1,1,1)
 
-EnemyLockButton.MouseButton1Click:Connect(function()
-    enemyLockOn = not enemyLockOn
-    EnemyLockButton.BackgroundColor3 = enemyLockOn and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
-end)
-
-local function getNearestEnemy()
+local function getNearestEnemyPlayer()
     local nearest = nil
     local shortestDistance = math.huge
     local lpChar = LocalPlayer.Character
+    local lpTeam = LocalPlayer.Team
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
     local lpPos = lpChar.HumanoidRootPart.Position
+
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        if player ~= LocalPlayer and player.Team ~= lpTeam and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local distance = (player.Character.HumanoidRootPart.Position - lpPos).Magnitude
             if distance < shortestDistance then
                 shortestDistance = distance
@@ -269,105 +288,326 @@ local function getNearestEnemy()
     return nearest
 end
 
--- Hitbox Breaker / Spin + Lay Down
-local hitboxBreaker = false
-local HitboxButton = Instance.new("TextButton", Frame)
-HitboxButton.Position = UDim2.new(0,10,0,400)
-HitboxButton.Size = UDim2.new(1,-20,0,40)
-HitboxButton.Text = "Hitbox Breaker"
-HitboxButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-HitboxButton.TextColor3 = Color3.new(1,1,1)
 
-HitboxButton.MouseButton1Click:Connect(function()
-    hitboxBreaker = not hitboxBreaker
-    HitboxButton.BackgroundColor3 = hitboxBreaker and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+-- Custom Lock-On
+local customLockOn = false
+local selectedPlayers = {}
+
+local CustomLockButton = Instance.new("TextButton", Frame)
+CustomLockButton.Position = UDim2.new(0,10,0,500)
+CustomLockButton.Size = UDim2.new(1,-20,0,40)
+CustomLockButton.Text = "Custom Lock-On"
+CustomLockButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+CustomLockButton.TextColor3 = Color3.new(1,1,1)
+
+
+local SelectionFrame = Instance.new("Frame", ScreenGui)
+SelectionFrame.Size = UDim2.new(0, 300, 0, 400)
+SelectionFrame.Position = UDim2.new(0.5, -150, 0, 20)
+SelectionFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+SelectionFrame.Visible = false
+SelectionFrame.Active = true
+SelectionFrame.Draggable = true
+
+local SearchBox = Instance.new("TextBox", SelectionFrame)
+SearchBox.Size = UDim2.new(1, -20, 0, 32)
+SearchBox.Position = UDim2.new(0, 10, 0, 10)
+SearchBox.PlaceholderText = "Search players..."
+SearchBox.ClearTextOnFocus = false
+SearchBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
+SearchBox.TextColor3 = Color3.new(1,1,1)
+SearchBox.Font = Enum.Font.SourceSans
+SearchBox.TextSize = 18
+
+
+local CloseButton = Instance.new("TextButton", SelectionFrame)
+CloseButton.Position = UDim2.new(1,-35,0,5)
+CloseButton.Size = UDim2.new(0,30,0,30)
+CloseButton.Text = "X"
+CloseButton.BackgroundColor3 = Color3.fromRGB(150,0,0)
+CloseButton.TextColor3 = Color3.new(1,1,1)
+
+CloseButton.MouseButton1Click:Connect(function()
+    SelectionFrame.Visible = false
 end)
 
--- AutoNoClip
-local autoNoClipEnabled = false
-local NoClipButton = Instance.new("TextButton", Frame)
-NoClipButton.Position = UDim2.new(0,10,0,450)
-NoClipButton.Size = UDim2.new(1,-20,0,40)
-NoClipButton.Text = "Toggle AutoNoClip"
-NoClipButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-NoClipButton.TextColor3 = Color3.new(1,1,1)
 
-NoClipButton.MouseButton1Click:Connect(function()
-    autoNoClipEnabled = not autoNoClipEnabled
-    NoClipButton.BackgroundColor3 = autoNoClipEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+local function refreshPlayerList()
+    for _, child in pairs(SelectionFrame:GetChildren()) do
+        if child:IsA("TextButton") and child ~= CloseButton then
+            child:Destroy()
+        end
+    end
+
+    local yPos = 52
+    local query = tostring(SearchBox.Text or ""):lower()
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local nameLower = player.Name:lower()
+            if query == "" or string.find(nameLower, query, 1, true) then
+                local btn = Instance.new("TextButton", SelectionFrame)
+                btn.Position = UDim2.new(0,10,0,yPos)
+                btn.Size = UDim2.new(1,-20,0,30)
+                btn.Text = player.Name
+                btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+                btn.TextColor3 = Color3.new(1,1,1)
+
+                btn.MouseButton1Click:Connect(function()
+                    local exists = false
+                    for _,p in pairs(selectedPlayers) do
+                        if p == player then exists = true end
+                    end
+                    if exists then
+                        for i,p in pairs(selectedPlayers) do
+                            if p == player then table.remove(selectedPlayers,i) break end
+                        end
+                        btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+                    else
+                        table.insert(selectedPlayers, player)
+                        btn.BackgroundColor3 = Color3.fromRGB(0,255,0)
+                    end
+                end)
+
+                yPos = yPos + 40
+            end
+        end
+    end
+end
+
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    refreshPlayerList()
 end)
 
--- Bottom Info Text
-local InfoLabel = Instance.new("TextLabel", Frame)
-InfoLabel.Size = UDim2.new(1, -20, 0, 80)
-InfoLabel.Position = UDim2.new(0, 10, 1, -10) -- slightly lower
-InfoLabel.Text = "REVOLVER= AIMBOT\nPISTOL= AIMBOT"
-InfoLabel.TextColor3 = Color3.new(1,1,1)
-InfoLabel.BackgroundTransparency = 1
-InfoLabel.Font = Enum.Font.SourceSansBold
-InfoLabel.TextSize = 20
-InfoLabel.TextWrapped = true
-InfoLabel.TextYAlignment = Enum.TextYAlignment.Top
 
--- Main Loop
-RunService.RenderStepped:Connect(function()
+Players.PlayerAdded:Connect(function()
+    refreshPlayerList()
+end)
+
+Players.PlayerRemoving:Connect(function()
+    refreshPlayerList()
+end)
+
+
+CustomLockButton.MouseButton1Click:Connect(function()
+    customLockOn = not customLockOn
+    CustomLockButton.BackgroundColor3 = customLockOn and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+    SelectionFrame.Visible = true
+    refreshPlayerList()
+end)
+
+
+---------------------------------------------------
+-- 🚁 NEW: DRONE MODE BUTTON INTEGRATION
+---------------------------------------------------
+local droneMode = false
+local DroneButton = Instance.new("TextButton", Frame)
+DroneButton.Position = UDim2.new(0,10,0,550) -- Positioned 50 pixels below Custom Lock-On (500 + 50)
+DroneButton.Size = UDim2.new(1,-20,0,40)
+DroneButton.Text = "Toggle Drone Mode"
+DroneButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+DroneButton.TextColor3 = Color3.new(1,1,1)
+
+DroneButton.MouseButton1Click:Connect(function()
+    droneMode = not droneMode
+    DroneButton.BackgroundColor3 = droneMode and Color3.fromRGB(0,255,0) or Color3.fromRGB(70,70,70)
+end)
+
+
+---------------------------------------------------
+-- 🚁 DRONE MODE VARIABLES (From your second script)
+---------------------------------------------------
+local CHARACTER, HRP, HEAD
+local angle = 0
+local HOVER = 18
+local RADIUS = 10
+local ORBIT_SPEED = 2.1
+local DODGE_CHANCE = 0.02
+local DODGE_STRENGTH = 8
+local JITTER_STRENGTH = 0.15
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    CHARACTER = char
+    HRP = char:WaitForChild("HumanoidRootPart")
+    HEAD = char:WaitForChild("Head")
+end)
+
+if LocalPlayer.Character then
+    CHARACTER = LocalPlayer.Character
+    HRP = CHARACTER:WaitForChild("HumanoidRootPart")
+    HEAD = CHARACTER:WaitForChild("Head")
+end
+
+local function getNearest() -- Renamed from getNearest() in the drone script to avoid conflict with the admin panel's getNearestPlayer, and made it the drone version.
+    if not HRP then return nil end
+
+    local nearest, dist = nil, 9999
+    local origin = HRP.Position
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            local head = plr.Character.Head
+            local d = (head.Position - origin).Magnitude
+            if d < dist and d < 450 then
+                nearest = head
+                dist = d
+            end
+        end
+    end
+
+    return nearest
+end
+
+
+-- MAIN LOOP
+RunService.RenderStepped:Connect(function(dt)
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     local hrp = char.HumanoidRootPart
 
-    -- Fly
+    ---------------------------------------------------
+    -- 🛫 FLY MOVEMENT (NOW USES flySpeed FROM BOX)
+    ---------------------------------------------------
     if flyEnabled then
         local camCFrame = Camera.CFrame
-        local direction = Vector3.new(0,0,0)
-        if keysDown[Enum.KeyCode.W] then direction = direction + camCFrame.LookVector end
-        if keysDown[Enum.KeyCode.S] then direction = direction - camCFrame.LookVector end
-        if keysDown[Enum.KeyCode.A] then direction = direction - camCFrame.RightVector end
-        if keysDown[Enum.KeyCode.D] then direction = direction + camCFrame.RightVector end
-        if keysDown[Enum.KeyCode.Space] then direction = direction + Vector3.new(0,1,0) end
-        if keysDown[Enum.KeyCode.LeftShift] then direction = direction + Vector3.new(0,-1,0) end
-        if direction.Magnitude > 0 then
-            hrp.Velocity = direction.Unit * flySpeed
-        else
-            hrp.Velocity = Vector3.new(0,0,0)
+        local direction = Vector3.new()
+
+        if keysDown[Enum.KeyCode.W] then direction += camCFrame.LookVector end
+        if keysDown[Enum.KeyCode.S] then direction -= camCFrame.LookVector end
+        if keysDown[Enum.KeyCode.A] then direction -= camCFrame.RightVector end
+        if keysDown[Enum.KeyCode.D] then direction += camCFrame.RightVector end
+        if keysDown[Enum.KeyCode.Space] then direction += Vector3.new(0,1,0) end
+        if keysDown[Enum.KeyCode.LeftShift] then direction -= Vector3.new(0,1,0) end
+
+        hrp.Velocity = direction.Magnitude > 0 and direction.Unit * flySpeed or Vector3.new()
+    end
+
+
+    ---------------------------------------------------
+    -- 🤖 DRONE MODE (Your new feature)
+    ---------------------------------------------------
+    if droneMode and HRP then
+        local targetHead = getNearest()
+        if targetHead then
+            local targetPos = targetHead.Position
+
+            -- JITTER CORRECTION (smooths camera)
+            local camDir = (targetPos - Camera.CFrame.Position).Unit
+            local safeCam = CFrame.lookAt(
+                Camera.CFrame.Position,
+                Camera.CFrame.Position + camDir
+            )
+            Camera.CFrame = Camera.CFrame:Lerp(safeCam, JITTER_STRENGTH)
+
+            -- BODY ROTATION (keeps gun accurate)
+            local lookCF = CFrame.lookAt(HRP.Position, targetPos)
+            HRP.CFrame = HRP.CFrame:Lerp(lookCF, 0.45)
+
+            -- DRONE ORBIT MOVEMENT
+            angle += dt * ORBIT_SPEED
+            local circleOffset = Vector3.new(
+                math.cos(angle) * RADIUS,
+                HOVER,
+                math.sin(angle) * RADIUS
+            )
+            local goalPos = targetPos + circleOffset
+
+            -- AUTO DODGE (random small burst movement)
+            if math.random() < DODGE_CHANCE then
+                goalPos += Vector3.new(
+                    math.random(-DODGE_STRENGTH, DODGE_STRENGTH),
+                    math.random(2,5),
+                    math.random(-DODGE_STRENGTH, DODGE_STRENGTH)
+                )
+            end
+
+            -- MOVE WITHOUT BREAKING GUNS OR CAMERA
+            local newPos = HRP.Position:Lerp(goalPos, 0.1)
+            HRP.CFrame = CFrame.new(newPos, targetPos)
+
+            -- ARM LOCK (accurate shots)
+            if char then
+                local rArm = char:FindFirstChild("RightUpperArm")
+                local lArm = char:FindFirstChild("LeftUpperArm")
+                if rArm then rArm.CFrame = CFrame.lookAt(rArm.Position, targetPos) end
+                if lArm then lArm.CFrame = CFrame.lookAt(lArm.Position, targetPos) end
+            end
         end
     end
 
-    -- Regular Lock-On
+
+    -- Lock-On
     if lockOn then
         local target = getNearestPlayer()
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPos = target.Character.HumanoidRootPart.Position
-            local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
-            hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos + Vector3.new(0,1.5,0))
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            hrp.CFrame = CFrame.new(hrp.Position, target.Character.Head.Position)
+            Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, target.Character.Head.Position)
         end
     end
 
     -- Enemy Lock-On
     if enemyLockOn then
-        local target = getNearestEnemy()
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPos = target.Character.HumanoidRootPart.Position
-            local lookVector = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position).Unit
-            hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookVector)
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos + Vector3.new(0,1.5,0))
+        local target = getNearestEnemyPlayer()
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            hrp.CFrame = CFrame.new(hrp.Position, target.Character.Head.Position)
+            Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, target.Character.Head.Position)
         end
     end
 
-    -- Hitbox Breaker
+    -- Custom Lock-On
+    if customLockOn and #selectedPlayers > 0 then
+        local nearest = nil
+        local shortestDistance = math.huge
+        for _, player in pairs(selectedPlayers) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (player.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    nearest = player
+                end
+            end
+        end
+
+        if nearest and nearest.Character and nearest.Character:FindFirstChild("Head") then
+            hrp.CFrame = CFrame.new(hrp.Position, nearest.Character.Head.Position)
+            Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, nearest.Character.Head.Position)
+        end
+    end
+
+    -- Crazy Spin Sit
     if hitboxBreaker then
-        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(50), 0) -- spin 50 speed
-        if char:FindFirstChild("Humanoid") then
-            char.Humanoid.Sit = true -- lay down
-        end
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.Sit = true end
+        hrp.CFrame = hrp.CFrame * CFrame.Angles(math.rad(6), math.rad(4), math.rad(6))
     end
 
-    -- AutoNoClip
+    -- NoClip
     if autoNoClipEnabled then
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
             end
+        end
+    end
+
+    -- ESP update
+    if espEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local isEnemy = (player.Team ~= LocalPlayer.Team)
+                    local color = isEnemy and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,255,0)
+                    createOrUpdateESP(player, color)
+                else
+                    removeESP(player)
+                end
+            end
+        end
+    else
+        for player, box in pairs(espBoxes) do
+            box:Destroy()
+            espBoxes[player] = nil
         end
     end
 end)
